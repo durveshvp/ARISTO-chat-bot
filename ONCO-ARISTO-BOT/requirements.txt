@@ -6,3 +6,7 @@ pypdf
 langchain_community
 python-dotenv
 sentence-transformers
+langchain-google-genai # Ensure this is present
+Unstructured # For .doc/.docx
+python-magic # Often a dependency for Unstructured on Linux/macOS
+libmagic # System dependency for python-magic (install with apt-get or brew)

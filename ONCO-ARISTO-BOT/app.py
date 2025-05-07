@@ -208,9 +208,15 @@ def load_chroma_db_from_disk(path, _embedding_model):
         st.error(f"Error loading ChromaDB index from {path}: {e}. Will try to rebuild.")
         return None
 
+# --- Function to clear conversation ---
+def clear_conversation():
+    """Function to clear conversation history without directly modifying input widget state"""
+    st.session_state.conversation_history = []
+    # We don't modify user_query_input here
+
 # --- Initialize session state ---
 if 'user_query_input' not in st.session_state:
-     st.session_state.user_query_input = ""
+    st.session_state.user_query_input = ""
 if 'session_id' not in st.session_state:
     st.session_state.session_id = str(uuid.uuid4())
 if 'chroma_db' not in st.session_state:
@@ -322,6 +328,11 @@ with left_col:
                         except Exception as e:
                             st.warning(f"Could not delete temp file {path}: {e}")
                     st.rerun()
+    
+    # Add Clear Conversation button to left column
+    if st.button("🧹 Clear Conversation", key="clear_chat_button"):
+        clear_conversation()
+        st.rerun()  # Reload the app without modifying widget state directly
 
 # --- Right column: Chat interface ---
 with right_col:
@@ -331,52 +342,49 @@ with right_col:
         with chat_container:
             st.markdown('<div class="chat-history-container">', unsafe_allow_html=True)
             for i, (query, answer) in enumerate(st.session_state.conversation_history):
-                st.markdown('</div>', unsafe_allow_html=True)
                 st.markdown(f'<div class="chat-message user-message"><b>You:</b><br>{query}</div>', unsafe_allow_html=True)
                 st.markdown(f'<div class="chat-message bot-message"><b>Gemini:</b><br>{answer}</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)  # Close the container properly
 
-        user_query = st.text_area(
-        "Ask a question about the content of your documents:",
-        key="user_query_input", # Link to session state
-        height=100 # Initial height, will expand (adjust 100 as needed)
-    )
+        # Use a form for question submission to better handle input state
+        with st.form(key="chat_form"):
+            user_query = st.text_area(
+                "Ask a question about the content of your documents:",
+                key="user_query_input", # Link to session state
+                height=100 # Initial height, will expand (adjust 100 as needed)
+            )
+            
+            submit_button = st.form_submit_button("Submit Question")
+            
+            if submit_button and user_query:
+                with st.spinner("🔎 Searching and thinking..."):
+                    try:
+                        # Adjust Similarity Search k
+                        relevant_docs = st.session_state.chroma_db.similarity_search(user_query, k=7)
 
-        if st.button("Submit Question", key="submit_query_button") and st.session_state.user_query_input:
-            user_query = st.session_state.user_query_input 
-            with st.spinner("🔎 Searching and thinking..."):
-                try:
-                    # Adjust Similarity Search k
-                    relevant_docs = st.session_state.chroma_db.similarity_search(user_query, k=7)
+                        context_parts = []
+                        for doc in relevant_docs:
+                            source = doc.metadata.get('source', 'Unknown source')
+                            context_parts.append(f"[Source: {source}]\n{doc.page_content}")
+                        context = "\n\n---\n\n".join(context_parts)
 
-                    context_parts = []
-                    for doc in relevant_docs:
-                        source = doc.metadata.get('source', 'Unknown source')
-                        context_parts.append(f"[Source: {source}]\n{doc.page_content}")
-                    context = "\n\n---\n\n".join(context_parts)
+                        prompt = f"""You are a helpful AI assistant. Answer the question based ONLY on the provided context. If the answer is not found in the context, say "I could not find an answer in the provided documents." Do not make up information.
 
-                    prompt = f"""You are a helpful AI assistant. Answer the question based ONLY on the provided context. If the answer is not found in the context, say "I could not find an answer in the provided documents." Do not make up information.
+                        Context:
+                        {context}
 
-                    Context:
-                    {context}
+                        Question: {user_query}
+                        Answer:"""
 
-                    Question: {user_query}
-                    Answer:"""
+                        response_obj = llm.invoke(prompt)
+                        raw_answer = response_obj.content.strip()
+                        clean_answer = extract_answer_only(raw_answer)
 
-                    response_obj = llm.invoke(prompt)
-                    raw_answer = response_obj.content.strip()
-                    clean_answer = extract_answer_only(raw_answer)
+                        st.session_state.conversation_history.append((user_query, clean_answer))
+                        st.rerun()
 
-                    st.session_state.conversation_history.append((user_query, clean_answer))
-                    st.rerun()
-
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
-
-        if st.session_state.conversation_history:
-            if st.button("🗑️ Clear Conversation", key="clear_chat_button"):
-                st.session_state.conversation_history = []
-                st.session_state.user_query_input = ""
-                st.rerun()
+                    except Exception as e:
+                        st.error(f"An error occurred: {e}")
     else:
         st.warning("👈 Please ensure documents are loaded or uploaded to activate the chat.")
         if not get_documents_in_directory(PDF_DIR) and not uploaded_files:

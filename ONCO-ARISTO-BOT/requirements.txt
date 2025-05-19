@@ -1,4 +1,4 @@
-langchain
+langchain==0.1.15
 faiss-cpu
 streamlit
 huggingface_hub
@@ -6,9 +6,11 @@ pypdf
 langchain_community
 python-dotenv
 sentence-transformers
-langchain-google-genai # Ensure this is present
-Unstructured # For .doc/.docx
-python-magic # Often a dependency for Unstructured on Linux/macOS
-libmagic # System dependency for python-magic (install with apt-get or brew)
+langchain-google-genai
+# For .doc/.docx
+unstructured
+# Often a dependency for Unstructured on Linux/macOS
+python-magic
+# System dependency for python-magic (install with apt-get or brew)
+# libmagic - install separately with: apt-get install libmagic1 (Linux) or brew install libmagic (Mac)
 chromadb==0.4.22
-langchain==0.1.15

@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 import re
 import uuid
 import glob
+import nest_asyncio
+nest_asyncio.apply()
 # Updated imports for ChromaDB
 from chromadb import PersistentClient  # New import
 
@@ -85,7 +87,7 @@ def load_embedding_model():
 @st.cache_resource
 def load_llm_model():
     """Loads the Google Gemini LLM."""
-    return ChatGoogleGenerativeAI(model="gemini-2.0-flash", temperature=0.3, convert_system_message_to_human=True)
+    return ChatGoogleGenerativeAI(model="gemini-2.5-flash-preview-04-17", temperature=0.3, convert_system_message_to_human=True)
 
 embedding_model = load_embedding_model()
 llm = load_llm_model()

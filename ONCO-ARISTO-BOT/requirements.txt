@@ -13,4 +13,5 @@ unstructured
 python-magic
 # System dependency for python-magic (install with apt-get or brew)
 # libmagic - install separately with: apt-get install libmagic1 (Linux) or brew install libmagic (Mac)
-chromadb==0.4.22
+#chromadb==0.4.22
+chromadb==0.4.10

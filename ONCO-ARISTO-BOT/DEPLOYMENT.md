@@ -1,4 +1,4 @@
-# Onco-Med ChatBot Deployment Guide
+<!-- # Onco-Med ChatBot Deployment Guide
 
 This document provides instructions to deploy your Onco-Med ChatBot to the internet using Render.com.
 
@@ -49,4 +49,4 @@ If you prefer using Streamlit Cloud:
 If you encounter issues during deployment:
 - Check the build logs for any error messages
 - Ensure all dependencies are correctly listed in requirements.txt
-- Verify your environment variables are set correctly
+- Verify your environment variables are set correctly -->

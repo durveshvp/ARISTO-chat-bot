@@ -6,7 +6,7 @@ try:
     sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 except ImportError:
     pass
-
+import torch 
 import streamlit as st
 import tempfile
 from langchain_community.document_loaders import PyPDFLoader, UnstructuredWordDocumentLoader
@@ -22,6 +22,7 @@ import nest_asyncio
 nest_asyncio.apply()
 # Updated imports for ChromaDB
 from chromadb import PersistentClient  # New import
+torch.classes.__path__=[]
 
 # --- Configuration ---
 st.set_page_config(layout="wide")

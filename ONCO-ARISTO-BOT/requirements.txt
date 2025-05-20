@@ -3,7 +3,6 @@ langchain_community==0.0.38
 unstructured==0.17.2
 unstructured[doc]==0.17.2
 python-magic==0.4.27
-# Removed python-magic-bin as it's not available on Render
 python-docx==1.1.2
 pypdf==5.5.0
 streamlit==1.45.1
@@ -14,5 +13,4 @@ python-dotenv==1.1.0
 langchain-google-genai==1.0.4
 chromadb==0.4.22
 nest-asyncio==1.6.0
-# Add this package to fix the SQLite version issue
 pysqlite3-binary
